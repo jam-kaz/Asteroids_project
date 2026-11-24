@@ -19,13 +19,12 @@
 ## Требования к системе
 - **Python:** 3.9 или выше
 - **Операционная система:** Windows / macOS / Linux
-- **Библиотеки:**
-  - `pygame==2.6.1`
+- **Библиотеки:** pygame==2.6.1
 
 ## Установка и запуск
 ### 1. Клонирование репозитория
 ```bash
-git clone https://github.com
+git clone https://github.com/jam-kaz/Asteroids_project.git
 cd asteroids-game
 ```
 
