@@ -22,7 +22,6 @@ def create_background() -> pygame.Surface:
     bg = pygame.Surface((WIDTH, HEIGHT))
     bg.fill((14, 11, 22))
 
-    # Мягкие красно-коричневые и синие космические туманности
     nebula = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     nebula_colors = [
         (95, 35, 22, 16),
@@ -37,7 +36,7 @@ def create_background() -> pygame.Surface:
         pygame.draw.circle(nebula, rng.choice(nebula_colors), (x, y), r)
     bg.blit(nebula, (0, 0))
 
-    # Разноцветные фоновые звезды и блики
+    """Разноцветные фоновые звезды и блики"""
     star_colors = [
         (255, 255, 255),
         (200, 220, 255),
@@ -56,7 +55,7 @@ def create_background() -> pygame.Surface:
             pygame.draw.circle(glow, (*col, 55), (12, 12), 10)
             bg.blit(glow, (x - 12, y - 12))
 
-    # Яркая голубая звезда со свечением ближе к центру
+    """Яркая голубая звезда со свечением ближе к центру"""
     cx, cy = int(WIDTH * 0.46), int(HEIGHT * 0.44)
     star_glow = pygame.Surface((200, 200), pygame.SRCALPHA)
     for r in range(85, 5, -4):
@@ -113,11 +112,11 @@ def create_ship_surfaces() -> tuple[pygame.Surface, pygame.Surface]:
         pygame.draw.polygon(surf, (175, 182, 195), outer_wings)
         pygame.draw.polygon(surf, (55, 60, 70), outer_wings, 2)
 
-        # Красные полосы на крыльях
+        """Красные полосы на крыльях"""
         pygame.draw.line(surf, (195, 45, 45), (cx - 6, cy - 12), (cx - 16, cy - 21), 3)
         pygame.draw.line(surf, (195, 45, 45), (cx - 6, cy + 12), (cx - 16, cy + 21), 3)
 
-        # Основной фюзеляж
+        """Основной фюзеляж"""
         body = [
             (cx + 28, cy),
             (cx + 8, cy - 10),
@@ -129,12 +128,12 @@ def create_ship_surfaces() -> tuple[pygame.Surface, pygame.Surface]:
         pygame.draw.polygon(surf, (230, 234, 240), body)
         pygame.draw.polygon(surf, (70, 75, 85), body, 2)
 
-        # Красный нос и центральная полоса
+        """Красный нос и центральная полоса"""
         nose = [(cx + 28, cy), (cx + 15, cy - 5), (cx + 15, cy + 5)]
         pygame.draw.polygon(surf, (200, 40, 40), nose)
         pygame.draw.line(surf, (190, 45, 45), (cx - 16, cy), (cx + 14, cy), 2)
 
-        # Стеклянная кабина пилота
+        """Стеклянная кабина пилота"""
         pygame.draw.ellipse(surf, (45, 145, 215), (cx - 2, cy - 5, 15, 10))
         pygame.draw.ellipse(surf, (170, 230, 255), (cx + 2, cy - 3, 7, 4))
 
@@ -178,7 +177,7 @@ def create_asteroid_surface() -> pygame.Surface:
     pygame.draw.circle(surf, (162, 165, 172), (cx - 7, cy - 7), 23)
     pygame.draw.circle(surf, (112, 114, 120), (cx + 7, cy + 7), 22)
 
-    # Кратеры с темным дном и светлой кромкой
+    """Кратеры с темным дном и светлой кромкой"""
     craters = [
         (cx - 12, cy - 10, 7),
         (cx + 8, cy - 12, 6),
