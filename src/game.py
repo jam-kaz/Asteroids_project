@@ -43,7 +43,7 @@ class AsteroidsGame:
         self.hud_font = pygame.font.Font(None, 36)
 
 
-        # Загрузка/генерация графических ресурсов
+        """Загрузка/генерация графических ресурсов"""
         self.bg_image = create_background()
         self.debris_image = create_debris_layer()
         self.ship_idle_img, self.ship_thrust_img = create_ship_surfaces()
@@ -53,20 +53,20 @@ class AsteroidsGame:
         self.splash_img = create_splash_surface()
         self.splash_rect = self.splash_img.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 
-        # Состояние игры
+        """Состояние игры"""
         self.running = True
         self.started = False
         self.lives = INITIAL_LIVES
         self.score = INITIAL_SCORE
         self.debris_x = 0.0
 
-        # Игровые объекты
+        """Игровые объекты"""
         self.ship = Ship((WIDTH // 2, HEIGHT // 2), self.ship_idle_img, self.ship_thrust_img)
         self.asteroids: list[Asteroid] = []
         self.missiles: list[Missile] = []
         self.explosions: list[Explosion] = []
 
-        # Пользовательское событие таймера генерации астероидов
+        """Пользовательское событие таймера генерации астероидов"""
         self.SPAWN_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(self.SPAWN_EVENT, ASTEROID_SPAWN_INTERVAL)
 
@@ -85,7 +85,7 @@ class AsteroidsGame:
         if not self.started or len(self.asteroids) >= ASTEROID_MAX_COUNT:
             return
 
-        # Подбор координат вне безопасной зоны вокруг корабля
+        """Подбор координат вне безопасной зоны вокруг корабля"""
         for _ in range(20):
             pos = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
             if dist(pos, self.ship.pos) > SAFE_SPAWN_DISTANCE:
@@ -111,7 +111,7 @@ class AsteroidsGame:
                 self.spawn_asteroid()
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Старт только при щелчке строго по прямоугольнику заставки
+                """Старт только при щелчке строго по прямоугольнику заставки"""
                 if not self.started and self.splash_rect.collidepoint(event.pos):
                     self.start_new_game()
 
@@ -127,7 +127,7 @@ class AsteroidsGame:
 
             elif event.type == pygame.KEYUP and self.started:
                 if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
-                    # Проверяем, не зажата ли противоположная стрелка
+                    """Проверяем, не зажата ли противоположная стрелка"""
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_LEFT]:
                         self.ship.rotate(-1)
@@ -140,10 +140,9 @@ class AsteroidsGame:
 
     def update(self) -> None:
         """Обновляет состояние динамического фона, объектов и проверяет столкновения."""
-        # Бесшовная прокрутка динамического фона влево
         self.debris_x = (self.debris_x - DEBRIS_SCROLL_SPEED) % WIDTH
 
-        # Обновление анимаций взрывов (работает даже при завершении игры)
+        """Обновление анимаций взрывов (работает даже при завершении игры)"""
         for explosion in self.explosions[:]:
             explosion.update()
             if explosion.finished:
@@ -165,7 +164,7 @@ class AsteroidsGame:
 
     def _check_collisions(self) -> None:
         """Обрабатывает столкновения ракет и корабля с астероидами."""
-        # 1. Столкновение ракет и астероидов
+        """ Столкновение ракет и астероидов """
         for missile in self.missiles[:]:
             for asteroid in self.asteroids[:]:
                 if missile.collides_with(asteroid):
@@ -177,7 +176,7 @@ class AsteroidsGame:
                     self.score += 1
                     break
 
-        # 2. Столкновение корабля и астероидов
+        """ Столкновение корабля и астероидов """
         for asteroid in self.asteroids[:]:
             if self.ship.collides_with(asteroid):
                 self.asteroids.remove(asteroid)
@@ -196,15 +195,15 @@ class AsteroidsGame:
 
     def draw(self) -> None:
         """Отрисовывает все слои графики, объекты и интерфейс."""
-        # 1. Неподвижный фон
+        """ 1. Неподвижный фон"""
         self.screen.blit(self.bg_image, (0, 0))
 
-        # 2. Динамический фон (движется влево, дублируется для бесшовности)
+        """ 2. Динамический фон (движется влево, дублируется для бесшовности)"""
         ix = int(self.debris_x)
         self.screen.blit(self.debris_image, (ix - WIDTH, 0))
         self.screen.blit(self.debris_image, (ix, 0))
 
-        # 3. Игровые объекты (отображаются только во время активной игры)
+        """ 3. Игровые объекты (отображаются только во время активной игры)"""
         if self.started:
             for missile in self.missiles:
                 missile.draw(self.screen)
@@ -212,17 +211,17 @@ class AsteroidsGame:
                 asteroid.draw(self.screen)
             self.ship.draw(self.screen)
 
-        # 4. Взрывы
+        """ 4. Взрывы """
         for explosion in self.explosions:
             explosion.draw(self.screen)
 
-        # 5. Интерфейс (жизни и очки)
+        """ 5. Интерфейс (жизни и очки) """
         lives_surf = self.hud_font.render(f"Lives: {self.lives}", False, (50, 255, 50))
         score_surf = self.hud_font.render(f"Score: {self.score}", False, (50, 255, 50))
         self.screen.blit(lives_surf, (40, 20))
         self.screen.blit(score_surf, (WIDTH - score_surf.get_width() - 40, 20))
 
-        # 6. Заставка (при старте или после окончания жизней)
+        """ 6. Заставка (при старте или после окончания жизней) """
         if not self.started:
             self.screen.blit(self.splash_img, self.splash_rect)
 
