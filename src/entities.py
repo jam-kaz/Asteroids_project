@@ -23,9 +23,11 @@ def angle_to_vector(angle_deg: float) -> tuple[float, float]:
     return math.cos(rad), math.sin(rad)
 
 
-def dist(pos1: list[float] | tuple[float, float], pos2: list[float] | tuple[float, float]) -> float:
+def dist(pos1: tuple[float, float], pos2: tuple[float, float]) -> float:
     """Вычисляет евклидово расстояние между двумя точками на плоскости."""
-    return math.hypot(pos1 - pos2, pos1 - pos2)
+    x1, y1 = pos1
+    x2, y2 = pos2
+    return math.hypot(x1 - x2, y1 - y2)
 
 
 class SpaceObject:
@@ -41,23 +43,32 @@ class SpaceObject:
         radius: float,
     ) -> None:
         """Инициализирует базовые физические параметры объекта."""
-        self.pos = [float(pos), float(pos)]
-        self.vel = [float(vel), float(vel)]
+        px, py = pos
+        vx, vy = vel
+        self.x = float(px)
+        self.y = float(py)
+        self.vx = float(vx)
+        self.vy = float(vy)
         self.angle = float(angle)
         self.angle_vel = float(angle_vel)
         self.image = image
         self.radius = radius
 
+    @property
+    def pos(self) -> tuple[float, float]:
+        """Возвращает текущие координаты объекта в виде кортежа (x, y)."""
+        return (self.x, self.y)
+
     def update_position(self) -> None:
         """Обновляет координаты и угол, обеспечивая тороидальную геометрию экрана."""
         self.angle = (self.angle + self.angle_vel) % 360
-        self.pos = (self.pos + self.vel) % WIDTH
-        self.pos = (self.pos + self.vel) % HEIGHT
+        self.x = (self.x + self.vx) % WIDTH
+        self.y = (self.y + self.vy) % HEIGHT
 
     def draw(self, surface: pygame.Surface) -> None:
         """Отрисовывает повернутый спрайт объекта относительно его центра."""
         rotated = pygame.transform.rotate(self.image, -self.angle)
-        rect = rotated.get_rect(center=(int(self.pos), int(self.pos)))
+        rect = rotated.get_rect(center=(int(self.x), int(self.y)))
         surface.blit(rotated, rect)
 
     def collides_with(self, other: "SpaceObject") -> bool:
@@ -93,29 +104,33 @@ class Ship(SpaceObject):
         """Обновляет скорость (с учетом ускорения и сопротивления среды) и позицию."""
         if self.thrust:
             fwd_x, fwd_y = angle_to_vector(self.angle)
-            self.vel += fwd_x * SHIP_THRUST_ACCEL
-            self.vel += fwd_y * SHIP_THRUST_ACCEL
+            self.vx += fwd_x * SHIP_THRUST_ACCEL
+            self.vy += fwd_y * SHIP_THRUST_ACCEL
 
-        self.vel *= SHIP_FRICTION
-        self.vel *= SHIP_FRICTION
+        self.vx *= SHIP_FRICTION
+        self.vy *= SHIP_FRICTION
 
-        if math.hypot(self.vel, self.vel) < 0.02 and not self.thrust:
-            self.vel = [0.0, 0.0]
+        if math.hypot(self.vx, self.vy) < 0.02 and not self.thrust:
+            self.vx = 0.0
+            self.vy = 0.0
 
         self.update_position()
 
     def shoot(self, missile_img: pygame.Surface) -> "Missile":
         """Создает ракету, вылетающую из носа корабля в направлении его ориентации."""
         fwd_x, fwd_y = angle_to_vector(self.angle)
-        nose_x = self.pos + fwd_x * self.radius
-        nose_y = self.pos + fwd_y * self.radius
+        nose_x = self.x + fwd_x * self.radius
+        nose_y = self.y + fwd_y * self.radius
         missile_vel = (fwd_x * MISSILE_SPEED, fwd_y * MISSILE_SPEED)
         return Missile((nose_x, nose_y), missile_vel, self.angle, missile_img)
 
     def reset(self, pos: tuple[float, float]) -> None:
         """Возрождает неподвижный корабль в центре игрового поля."""
-        self.pos = [float(pos), float(pos)]
-        self.vel = [0.0, 0.0]
+        px, py = pos
+        self.x = float(px)
+        self.y = float(py)
+        self.vx = 0.0
+        self.vy = 0.0
         self.angle = -90.0
         self.angle_vel = 0.0
         self.set_thrust(False)
@@ -164,9 +179,10 @@ class Missile(SpaceObject):
 class Explosion:
     """Класс тайловой покадровой анимации взрыва."""
 
-    def __init__(self, pos: list[float] | tuple[float, float], frames: list[pygame.Surface]) -> None:
+    def __init__(self, pos: tuple[float, float], frames: list[pygame.Surface]) -> None:
         """Инициализирует анимацию взрыва в заданных координатах."""
-        self.pos = (int(pos), int(pos))
+        px, py = pos
+        self.pos = (int(px), int(py))
         self.frames = frames
         self.tick = 0
         self.finished = False
@@ -184,4 +200,3 @@ class Explosion:
             frame = self.frames[frame_idx]
             rect = frame.get_rect(center=self.pos)
             surface.blit(frame, rect)
-
